@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Product List</h2>
+    <a href="{% url 'product_create' %}"><button type="submit" class="btn btn-success custom-create">Create New Product</button></a>
+    <style>
+        .content-table {
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .content-table thead tr {
+            background-color: #7cb1cc !important;
+            text-align: left;
+            font-weight: bold;
+        }
+        .content-table th,
+        .content-table td {
+            padding: 12px 15px;
+        }
+        .content-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+        .content-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .content-table tbody tr:last-of-type {
+            border-bottom: 2px solid #7cb1cc;
+        }
+    </style>
+    <table class="content-table">
+        <thead>
+            <tr>
+                <th>Product code</th>
+                <th>Product name</th>
+                <th>Group code</th>
+                <th>Group name</th>
+                <th>Price</th>
+            </tr>
+        <thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.product_code }}</td>
+                <td>{{ product.product_name }}</td>
+                <td>{{ product.group_code }}</td>
+                <td>{{ product.group_name }}</td>
+                <td>{{ product.price }}</td>
+                <td>
+                    <a href="{% url 'product_edit' product.pk %}"><button class="btn btn-sm btn-primary">Edit</button></a> 
+                    <a href="{% url 'product_delete' product.pk %}"><button class="btn btn-sm btn-danger">Delete</button></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

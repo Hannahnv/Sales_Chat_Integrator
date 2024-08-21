@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>List of products purchased by customers {{ customer.name }}</h2>
+    <table id="orderTable">
+        <tr>
+            <th>Product name</th>
+            <th>Product code</th>
+            <th>Order code</th>
+            <th>Created at</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.product.product_name }}</td>
+            <td>{{ order.product.product_code }}</td>
+            <td>{{ order.order_code }}</td>
+            <td>{{ order.created_at }}</td>
+            <td class="quantity">{{ order.quantity }}</td>
+            <td class="total-price">{{ order.total_price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div>
+        <p><strong>Total Price ({{ orders|length }} product):</strong> <span id="totalPrice"></span></p>
+        <form id="orderSummaryForm">
+            <div id = "product-rows">
+                <div class="product-row row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="discount">Discount (%):</label>
+                            <input type="number" id="discount" class="form-control" min="0" max="100" step="1">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="shippingFee">Shipping fee:</label>
+                            <input type="number" id="shippingFee" class="form-control" step="0.01">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="promoCode">Promo code:</label>
+                            <input type="text" id="promoCode" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="calculateTotal" class="btn btn-primary">Calculate Total</button>
+        </form>
+        <p><strong>Customer must pay:</strong> <span id="finalTotal"></span></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function calculateTotals() {
+                var totalQuantity = 0;
+                var totalPrice = 0;
+
+                $('#orderTable .quantity').each(function() {
+                    totalQuantity += parseInt($(this).text()) || 0;
+                });
+
+                $('#orderTable .total-price').each(function() {
+                    totalPrice += parseFloat($(this).text()) || 0;
+                });
+
+                $('#totalQuantity').text(totalQuantity);
+                $('#totalPrice').text(totalPrice.toFixed(0));
+            }
+
+            $('#calculateTotal').click(function() {
+                var totalPrice = parseFloat($('#totalPrice').text());
+                var discount = parseFloat($('#discount').val()) || 0;
+                var shippingFee = parseFloat($('#shippingFee').val()) || 0;
+
+                var discountAmount = totalPrice * (discount / 100);
+                var finalTotal = totalPrice - discountAmount + shippingFee;
+
+                $('#finalTotal').text(finalTotal.toFixed(0)).css('font-weight', 'bold');
+            });
+
+            calculateTotals();
+        });
+    </script>
+{% endblock %}

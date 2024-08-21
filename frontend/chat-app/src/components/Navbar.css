@@ -1,0 +1,33 @@
+/* Navbar.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #010406;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo a {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.navbar-chat a,
+.navbar-links a {
+    margin-left: 1rem;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.navbar-chat a:hover,
+.navbar-links a:hover {
+    color: #007bff;
+}

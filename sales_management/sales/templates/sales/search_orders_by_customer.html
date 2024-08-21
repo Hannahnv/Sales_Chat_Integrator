@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Search orders by customer</h2>
+    <table>
+        <tr>
+            <th>Customer name</th>
+            <th>Action</th>
+        </tr>
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.name }}</td>
+            <td><a href="{% url 'search_customer_orders' customer.id %}">View orders</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

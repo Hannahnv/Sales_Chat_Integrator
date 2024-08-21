@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>{% if edit %}Edit Order{% else %}Create New Order{% endif %}</h2>
+        <form method = "post" id="orderForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_order_code">Order Code:</label>
+                <input type="text" name="order_code" id="id_order_code" value="{{ form.order_code.value }}" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_customer_name">Customer Name:</label>
+                <input type="text" name="customer_name" id="id_customer_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_created_at">Created At:</label>
+                <input type="datetime-local" name="created_at" id="id_created_at" value="{{ form.created_at.value }}" class="form-control" required>
+            </div>
+
+            <h3>Order Lines</h3>
+            <div id="product-rows">
+                <div class="product-row row">
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            <label>No:</label>
+                            <input type="text" name="no[]" class="form-control no-input" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="product">Product:</label>
+                            <select name="product[]" class="form-control product-select">
+                                {% for product in products %}
+                                    <option value="{{ product.id }}" data-price="{{ product.price }}">{{ product.product_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" name="quantity[]" class="form-control quantity-input" value="1" min="1" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="line_total_price">Price:</label>
+                            <input type="text" name="line_total_price[]" class="form-control line-total-price" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger remove-product">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-product" class="btn btn-secondary">Add Product</button>
+
+            <div class="form-group mt-3">
+                <label for="total_price">Total Price:</label>
+                <input type="text" name="total_price" id="total_price" class="form-control" readonly>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <!-- Modal for price details -->
+    <div class="modal fade" id="priceModal" tabindex="-1" role="dialog" aria-labelledby="priceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="priceModalLabel">Price Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="priceBeforeTax">Price before tax:</label>
+                        <input type="text" id="priceBeforeTax" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="priceAfterTax">Price after tax:</label>
+                        <input type="text" id="priceAfterTax" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="outputTax">Output tax:</label>
+                        <input type="number" id="outputTax" class="form-control" min="0" max="100" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="regularDiscount">Regular discount (%):</label>
+                        <input type="number" id="regularDiscount" class="form-control" min="0" max="100" step="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="applyPriceChanges">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        $(document).ready(function() {
+            function updateTotalPrice() {
+                var totalPrice = 0;
+                $('.product-row').each(function() {
+                    var lineTotal = parseFloat($(this).find('.line-total-price').val()) || 0;
+                    totalPrice += lineTotal;
+                });
+                totalPrice = Math.floor(totalPrice);
+                $('#total_price').val(totalPrice);
+                updateRowNumbers();
+            }
+
+            function updateRowNumbers() {
+                $('.product-row').each(function(index) {
+                    $(this).find('.no-input').val(index + 1);
+                });
+            }
+
+            $('#add-product').click(function() {
+                var newProduct = $('.product-row').first().clone();
+                newProduct.find('select, input').val('');
+                newProduct.find('.line-total-price').val('0');
+                newProduct.appendTo('#product-rows');
+                updateRowNumbers();
+            });
+
+            $(document).on('click', '.remove-product', function() {
+                if ($('.product-row').length > 1) {
+                    $(this).closest('.product-row').remove();
+                    updateTotalPrice();
+                }
+            });
+
+            $(document).on('change', '.product-select, .quantity-input', function() {
+                var $row = $(this).closest('.product-row');
+                var price = parseFloat($row.find('.product-select option:selected').data('price'));
+                var quantity = parseFloat($row.find('.quantity-input').val());
+                var lineTotal = price * quantity;
+                lineTotal = Math.floor(lineTotal);
+                $row.find('.line-total-price').val(lineTotal);
+                updateTotalPrice();
+            });
+
+            $(document).on('click', '.line-total-price', function() {
+                var $row = $(this).closest('.product-row');
+                var price = parseFloat($row.find('.product-select option:selected').data('price'));
+                var quantity = parseFloat($row.find('.quantity-input').val());
+                var lineTotal = price * quantity;
+
+                $('#priceBeforeTax').val(lineTotal);
+                $('#priceAfterTax').val(lineTotal);
+                $('#outputTax').val(0);
+                $('#regularDiscount').val(0);
+
+                $('#priceModal').data('row', $row).modal('show');
+            });
+
+            $('#applyPriceChanges').click(function() {
+                var $row = $('#priceModal').data('row');
+                var priceBeforeTax = parseFloat($('#priceBeforeTax').val());
+                var outputTax = parseInt($('#outputTax').val()) || 0;
+                var regularDiscount = parseInt($('#regularDiscount').val()) || 0;
+
+                var priceAfterDiscount = priceBeforeTax * (1 - regularDiscount / 100);
+                var finalPrice = priceAfterDiscount * (1 + outputTax / 100);
+
+                finalPrice = Math.floor(finalPrice);
+                $row.find('.line-total-price').val(finalPrice);
+
+                updateTotalPrice();
+                $('#priceModal').modal('hide');
+            });
+
+            updateTotalPrice();
+        });
+
+        $('#orderForm').submit(function(event) {
+            event.preventDefault();
+
+            var formData = {
+                order_code: $('#id_order_code').val(),
+                customer_name: $('#id_customer_name').val(),
+                created_at: $('#id_created_at').val(),
+                order_lines: []
+            };
+        
+            $('.product-row').each(function() {
+                var productId = $(this).find('.product-select').val();
+                var quantity = $(this).find('.quantity-input').val();
+                var price = $(this).find('.price-input').val();
+
+                formData.order_lines.push({
+                    product: productId,
+                    quantity: quantity,
+                    total_price: price
+                });
+            });
+
+            fetch("{/sales/api/orderdetails/}", {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.id) {
+                    alert(data.message);
+                    window.location.href = '{% url "order_create" %}';
+                } else {
+                    alert('Error creating order: ' + JSON.stringify(data));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Sales Management System{% endblock %}</title>
+    <!--Bootstrap CSS-->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #555;
+        }
+        nav a, .dropdown > a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+            line-height: 25px; /* Đảm bảo chiều cao dòng */
+            display: flex;
+            align-items: center; /* Căn chỉnh theo chiều dọc */
+            justify-content: center; /* Căn chỉnh theo chiều ngang */
+        }
+        nav a:hover, .dropdown > a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            padding: 20px;
+        }
+        .dropdown {
+            display: inline-block;
+            position: relative;
+        }
+        .dropdown-options {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 10px 10px 0px rgba(0,0,0,0.4);
+            z-index: 1; /* Đảm bảo nó nổi lên trên */
+        }
+        .dropdown:hover .dropdown-options {
+            display: block;
+        }
+        .dropdown-options a {
+            display: block;
+            color: #000;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+        .dropdown-options a:hover {
+            color: #0a0a23;
+            background-color: #ddd;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #fff;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .message-group {
+            margin-bottom: 15px;
+            clear: both;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 70%;
+            display: inline-block;
+            margin-bottom: 2px;
+            word-wrap: break-word;
+        }
+        .user .chat-message {
+            background-color: #99CCFF;
+            float: right;
+        }
+        .other .chat-message {
+            background-color: #f1f0f0;
+            float: left;
+        }
+        .chat-username {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        .user .chat-username {
+            text-align: right;
+        }
+
+
+        .user-info {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropbtn {
+            background-color: #333;
+            color: white;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .dropbtn:hover {
+            background-color: #555;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0; /* Ensure it aligns to the right */
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden; /* Ensure border-radius applies */
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .dropdown-content form {
+            display: block;
+            text-align: center;
+            padding: 12px 16px;
+        }
+        
+        .dropdown-content button {
+            background-color: white;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: black;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-content button:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .user-info:hover .dropdown-content {
+            display: block;
+            max-height: 100px; /* Adjust based on your content */
+            opacity: 1;
+        }
+        
+        .nav-right {
+            position: absolute;
+            right: 0px;
+            display: flex;
+            align-items: center;
+        }
+        
+    </style>    
+</head>
+<body>
+    <header>
+        <h1>Sales Management System</h1>
+    </header>
+    <nav>
+        <a href="{% url 'index' %}">Home</a>
+        <a href="{% url 'customer_list' %}">Customers</a>
+        <a href="{% url 'product_list' %}">Products</a>
+        <a href="{% url 'order_list' %}">Orders</a>
+        <a href="{% url 'chat' %}">Chat</a>
+        <div class="dropdown">
+            <a href="#">Search</a>
+            <div class="dropdown-options">
+                <a href="{% url 'search_orders_by_product' %}">Search orders by product</a>
+                <a href="{% url 'search_orders_by_customer' %}">Search orders by customer</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <div class="user-info dropdown">
+                    <button class="dropbtn">{{ user.username }} <i class="fas fa-caret-down"></i></button>
+                    <div class="dropdown-content">
+                        <form id="logout-form" method="POST" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit">Log out</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <footer>
+        <p>© 2024 Sales Management System</p>
+    </footer>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

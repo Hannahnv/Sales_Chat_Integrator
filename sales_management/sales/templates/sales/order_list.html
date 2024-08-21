@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <h2>Order List</h2>
+    <a href="{% url 'order_create' %}"><button type="submit" class="btn btn-success custom-create">Create New Order</button></a>
+    <table>
+        <thead>
+            <tr>
+                <th>Order code</th>
+                <th>Customer name</th>
+                <th>Product name</th>
+                <th>Created at</th>
+                <th>Quantity</th>
+                <th>Total price</th>
+            </tr>
+        <thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_code }}</td>
+                <td>{{ order.customer.name }}</td>
+                <td>{{ order.product.product_name }}</td>
+                <td>{{ order.created_at }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>
+                    <div class = "btn-group">
+                        <a href="{% url 'order_edit' order.pk %}"><button class="btn btn-sm btn-primary">Edit</button></a>
+                        <a href="{% url 'order_delete' order.pk %}"><button class="btn btn-sm btn-danger">Delete</button></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if orders.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ orders.previous_page_number }}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ orders.number }} of {{ orders.paginator.num_pages }}.
+            </span>
+    
+            {% if orders.has_next %}
+                <a href="?page={{ orders.next_page_number }}">next</a>
+                <a href="?page={{ orders.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}

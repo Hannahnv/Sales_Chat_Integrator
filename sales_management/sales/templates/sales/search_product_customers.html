@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>List of customers who have purchased the product {{ product.product_name }}</h2>
+    <table>
+        <tr>
+            <th>Customer name</th>
+            <th>Customer code</th>
+            <th>Order code</th>
+            <th>Created at</th>
+            <th>Quantity</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.customer.name }}</td>
+            <td>{{ order.customer.customer_code }}</td>
+            <td>{{ order.order_code }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>{{ order.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

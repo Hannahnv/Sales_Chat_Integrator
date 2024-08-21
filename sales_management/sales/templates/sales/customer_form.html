@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>{% if edit %}Edit Customer{% else %}Create New Customer{% endif %}</h2>
+        <form method="post" id="customerForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_customer_code">Customer code</label>
+                <input type="text" name="customer_code" id="id_customer_code" class="form-control" value="{{ form.customer_code.value|default:'' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="id_customer_name">Customer name</label>
+                <input type="text" name="customer_name" id="id_customer_name" class="form-control" value="{{ form.customer_name.value|default:'' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="id_segment_code">Segment code</label>
+                <input type="text" name="segment_code" id="id_segment_code" class="form-control" value="{{ form.segment_code.value|default:'' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="id_segment_description">Segment description</label>
+                <input type="text" name="segment_description" id="id_segment_description" class="form-control" value="{{ form.segment_description.value|default:'' }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        $(document).ready(function() {
+            $('#customerForm').submit(function(event) {
+                event.preventDefault();
+
+                var formData = {
+                    customer_code: $('#id_customer_code').val(),
+                    customer_name: $('#id_customer_name').val(),
+                    segment_code: $('#id_segment_code').val(),
+                    segment_description: $('#id_segment_description').val(),
+                };
+
+                var url = "{% url 'customer_create' %}";
+                {% if edit %}
+                    url = "{% url 'customer_edit' customer.pk %}";
+                {% endif %}
+
+                fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = '{% url "customer_create" %}';
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred: ' + error.message);
+                });
+            });
+        });
+    </script>
+{% endblock %}

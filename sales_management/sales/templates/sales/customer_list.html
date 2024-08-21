@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Customer List</h2>
+    <a href="{% url 'customer_create' %}"><button type="submit" class="btn btn-success custom-create">Create New Customer</button></a>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer code</th>
+                <th>Customer name</th>
+                <th>Segment code</th>
+                <th>Segment description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.customer_code }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.segment_code }}</td>
+                <td>{{ customer.segment_description }}</td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{% url 'customer_edit' customer.pk %}"><button class="btn btn-sm btn-primary">Edit</button></a>
+                        <a href="{% url 'customer_delete' customer.pk %}"><button class="btn btn-sm btn-danger">Delete</button></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if customers.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ customers.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ customers.number }} of {{ customers.paginator.num_pages }}.
+            </span>
+
+            {% if customers.has_next %}
+                <a href="?page={{ customers.next_page_number }}">next</a>
+                <a href="?page={{ customers.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Sales Management System{% endblock %}
+
+{% block content %}
+    <div class="card my-5">
+        <div class="card-body text-center">
+            <h2 class="card-title" id="Welcome Message"><strong>Welcome to the Sales Management System</strong></h2>
+            <p class="card-text" id="Developed By">A website developed by <strong>Hang Nguyen</strong>!</p>
+        </div>
+    </div>
+    <div class="card my-5">
+        <div class="card-body">
+            <h3 class="card-title"><strong>Statistics Overview</strong></h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <p class="card-text">
+                                <strong>Total Customers</strong><br>
+                                <span class="display-4">{{ customer_count }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <p class="card-text">
+                                <strong>Total Products</strong><br>
+                                <span class="display-4">{{ product_count }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body text-center">
+                            <p class="card-text">
+                                <strong>Total Orders</strong><br>
+                                <span class="display-4">{{ order_count }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/api/home/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('Welcome_Message').innerText = data.WelcomeMessage;
+                document.getElementById('Developed By').innerText = data.DevelopedBy;
+                document.getElementById('Total Customers').innerText = data.customer_count;
+                document.getElementById('Total Products').innerText = data.product_count;
+                document.getElementById('Total Orders').innerText = data.order_count;
+            });
+        });
+    </script>
+{% endblock %}
