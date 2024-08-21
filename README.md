@@ -1,1 +1,1 @@
-# Django_sales_management
+# Sales Chat Integrator
